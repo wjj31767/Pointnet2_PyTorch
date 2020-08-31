@@ -36,7 +36,7 @@ parser.add_argument('--lr', default=0.001, type=float, help='learning rate in tr
 parser.add_argument('--step', nargs='+', default=[50, 80, 120, 150],
                     help='epochs when to change lr, for example type "--adj_step 50 80 120 150" in command line')
 parser.add_argument('--dr', nargs='+', default=[0.1, 0.1, 0.2, 0.2], help='decay rates of learning rate')
-parser.add_argument('--resume', type=str, default='example1', help='resume path')
+parser.add_argument('--resume', type=str, default='example', help='resume path')
 parser.add_argument('--feature_transform', type=int, default=1, help="use feature transform")
 parser.add_argument('--lambda_ft', type=float, default=0.001, help="lambda for feature transform")
 parser.add_argument('--augment', type=int, default=1, help='data argment to increase robustness')
@@ -51,20 +51,20 @@ args.adj_lr = {'steps': [int(temp) for temp in args.step],
 args.feature_transform, args.augment = bool(args.feature_transform), bool(args.augment)
 ### Set random seed
 args.seed = args.seed if args.seed > 0 else random.randint(1, 10000)
-if not os.path.exists('/home/wei/Pointnet2_PyTorch/pointnet2/models/checkpoints/lggan'):
-    os.mkdir('/home/wei/Pointnet2_PyTorch/pointnet2/models/checkpoints/lggan')
-io = IOStream('/home/wei/Pointnet2_PyTorch/pointnet2/models/checkpoints/lggan/run.log')
-io.cprint(str(args))
+if not os.path.exists(BASE_DIR+'/checkpoints/lggan'):
+    os.mkdir(BASE_DIR+'/checkpoints/lggan')
+io = IOStream(BASE_DIR+'/checkpoints/lggan/run.log')
+# io.cprint(str(args))
 TAU = args.tau
 epochs = 100
 
 # create adversarial example path
-ADV_PATH = "/home/wei/Pointnet2_PyTorch/pointnet2/models/checkpoints/LGGAN"
+ADV_PATH = BASE_DIR+"/checkpoints/LGGAN"
 if not os.path.exists('results'): os.mkdir('results')
 ADV_PATH = os.path.join('results', ADV_PATH)
 if not os.path.exists(ADV_PATH): os.mkdir(ADV_PATH)
 ADV_PATH = os.path.join(ADV_PATH, 'test')
-checkpoints_dir = "/home/wei/Pointnet2_PyTorch/LGGAN"
+checkpoints_dir = BASE_DIR+"/checkpoints/LGGAN"
 
 NUM_CLASSES = 40
 
@@ -140,7 +140,7 @@ if __name__ == '__main__':
     attack_model = PointNetCls(NUM_CLASSES, args.feature_transform).to(device)
     attack_model=attack_model.to(device)
     print('=====> Loading from checkpoint...')
-    checkpoint = torch.load('/home/wei/Pointnet2_PyTorch/pointnet2/models/checkpoints/%s.pth' % args.resume)
+    checkpoint = torch.load(BASE_DIR+'/checkpoints/%s.pth' % args.resume)
     args = checkpoint['args']
 
     torch.manual_seed(args.seed)

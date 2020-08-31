@@ -44,8 +44,9 @@ def pool(xyz, points, k, npoint):
     return new_xyz, new_points
 
 class pointcnn(nn.Module):
-    def __init__(self,k,n_cout,n_blocks,activation=F.relu):
+    def __init__(self,k,n_cout,n_blocks,activation=F.relu,bn=False):
         super(pointcnn,self).__init__()
+        self.bn=bn
         self.k = k
         self.n_cout=n_cout
         self.n_blocks = n_blocks
@@ -69,7 +70,9 @@ class pointcnn(nn.Module):
             if idx == self.n_blocks - 1:
                 return torch.max(grouped_points, 2).values
             else:
-                grouped_points = self.activation(self.bn(grouped_points))
+                if self.bn:
+                    grouped_points = self.bn(grouped_points)
+                grouped_points = self.activation(grouped_points)
 
 class res_gcn_d(nn.Module):
     def __init__(self, k, n_cout, n_blocks,indices=None):

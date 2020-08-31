@@ -4,7 +4,7 @@ from pointnet2_ops.pointnet2_modules import PointnetFPModule, PointnetSAModule
 
 
 class Generator(nn.Module):
-    def __init__(self, num_points=2048, bradius=1.0, up_ratio=4):
+    def __init__(self, num_points=2048, bradius=1.0, up_ratio=4,bn=False):
         super(Generator, self).__init__()
         self.num_points = num_points
         self.up_ratio = up_ratio
@@ -15,6 +15,7 @@ class Generator(nn.Module):
                 radius=bradius*0.05,
                 nsample=32,
                 mlp=[3, 32, 32, 64],
+                bn=False,
                 # use_xyz=self.hparams["model.use_xyz"],
             )
         )
@@ -24,6 +25,7 @@ class Generator(nn.Module):
                 radius=bradius*0.1,
                 nsample=32,
                 mlp=[64, 64, 64, 128],
+                bn=False,
                 # use_xyz=self.hparams["model.use_xyz"],
             )
         )
@@ -33,6 +35,7 @@ class Generator(nn.Module):
                 radius=bradius*0.2,
                 nsample=32,
                 mlp=[128, 128, 128, 256],
+                bn=False,
                 # use_xyz=self.hparams["model.use_xyz"],
             )
         )
@@ -42,37 +45,38 @@ class Generator(nn.Module):
                 radius=bradius*0.3,
                 nsample=32,
                 mlp=[256, 256, 256, 512],
+                bn=False,
                 # use_xyz=self.hparams["model.use_xyz"],
             )
         )
 
         self.FP_modules = nn.ModuleList()
-        self.FP_modules.append(PointnetFPModule(mlp=[512, 64]))
-        self.FP_modules.append(PointnetFPModule(mlp=[256, 64]))
-        self.FP_modules.append(PointnetFPModule(mlp=[128, 64]))
+        self.FP_modules.append(PointnetFPModule(mlp=[512, 64],bn=False))
+        self.FP_modules.append(PointnetFPModule(mlp=[256, 64],bn=False))
+        self.FP_modules.append(PointnetFPModule(mlp=[128, 64],bn=False))
         self.New_points_list = nn.ModuleList()
         for i in range(self.up_ratio):
             self.New_points_list.append(
                 nn.Sequential(
                     nn.Conv2d(259, 256, kernel_size=1, bias=False),
-                    nn.BatchNorm2d(256),
+                    # nn.BatchNorm2d(256),
                     nn.ReLU(True),
-                    nn.Dropout(0.5),
+                    # nn.Dropout(0.5),
                     nn.Conv2d(256, 128, kernel_size=1),
-                    nn.BatchNorm2d(128),
+                    # nn.BatchNorm2d(128),
                     nn.ReLU(True),
-                    nn.Dropout(0.5),
+                    # nn.Dropout(0.5),
                 )
             )
         self.fc_lyaer = nn.Sequential(
             nn.Conv2d(168, 64, kernel_size=1, bias=False),
-            nn.BatchNorm2d(64),
+            # nn.BatchNorm2d(64),
             nn.ReLU(True),
-            nn.Dropout(0.5),
+            # nn.Dropout(0.5),
             nn.Conv2d(64, 3, kernel_size=1),
-            nn.BatchNorm2d(3),
+            # nn.BatchNorm2d(3),
             nn.ReLU(True),
-            nn.Dropout(0.5),
+            # nn.Dropout(0.5),
         )
     def _break_up_pc(self, pc):
         xyz = pc[..., 0:3].contiguous()
