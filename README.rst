@@ -1,5 +1,5 @@
-Pointnet2/Pointnet++ PyTorch
-============================
+LG-GAN Pytorch version
+==========================
 
 * Implemention of Pointnet2/Pointnet++ written in `PyTorch <http://pytorch.org>`_.
 
