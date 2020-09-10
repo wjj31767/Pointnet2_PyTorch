@@ -14,8 +14,8 @@ class Generator(nn.Module):
                 npoint=num_points,
                 radius=bradius*0.05,
                 nsample=32,
-                mlp=[3, 32, 32, 64],
-                bn=False,
+                mlp=[0, 32, 32, 64],
+                bn=bn,
                 # use_xyz=self.hparams["model.use_xyz"],
             )
         )
@@ -25,7 +25,7 @@ class Generator(nn.Module):
                 radius=bradius*0.1,
                 nsample=32,
                 mlp=[64, 64, 64, 128],
-                bn=False,
+                bn=bn,
                 # use_xyz=self.hparams["model.use_xyz"],
             )
         )
@@ -35,7 +35,7 @@ class Generator(nn.Module):
                 radius=bradius*0.2,
                 nsample=32,
                 mlp=[128, 128, 128, 256],
-                bn=False,
+                bn=bn,
                 # use_xyz=self.hparams["model.use_xyz"],
             )
         )
@@ -45,7 +45,7 @@ class Generator(nn.Module):
                 radius=bradius*0.3,
                 nsample=32,
                 mlp=[256, 256, 256, 512],
-                bn=False,
+                bn=bn,
                 # use_xyz=self.hparams["model.use_xyz"],
             )
         )
@@ -96,7 +96,7 @@ class Generator(nn.Module):
                 be formated as (x, y, z, features...)
         """
         xyz, features = self._break_up_pc(pointcloud)
-        l1_xyz, l1_points = self.SA_modules[0](xyz, features)
+        l1_xyz, l1_points = self.SA_modules[0](xyz, None)
         l2_xyz, l2_points = self.SA_modules[1](l1_xyz, l1_points)
         l3_xyz, l3_points = self.SA_modules[2](l2_xyz, l2_points)
         l4_xyz, l4_points = self.SA_modules[3](l3_xyz, l3_points)

@@ -18,7 +18,7 @@ from pointnet2.utils import progress_bar, adjust_lr_steep, log_row
 from torchvision import transforms
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(BASE_DIR)
-import plotly.graph_objs as go
+#import plotly.graph_objs as go
 from pointnet2.transforms_3d import *
 
 ########################################
@@ -28,7 +28,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--model', type=str, default='pointnet', help='choose model type')
 parser.add_argument('--data', type=str, default='modelnet40', help='choose data set')
 parser.add_argument('--seed', type=int, default=0, help='manual random seed')
-parser.add_argument('--batch_size', type=int, default=4, help='input batch size')
+parser.add_argument('--batch_size', type=int, default=8, help='input batch size')
 parser.add_argument('--num_points', type=int, default=2048, help='input batch size')
 parser.add_argument('--epochs', type=int, default=100, help='number of epochs to train for')
 parser.add_argument('--optimizer', type=str, default='Adam', help='optimizer for training')
@@ -162,16 +162,16 @@ if __name__ == '__main__':
     attack_model.eval()
     best_acc = 0.0
     best_epoch = 0
-    if os.path.exists(str(checkpoints_dir) + '/best_model.pth'):
-        print('=====> Loading from checkpoint...')
-        checkpoint = torch.load(str(checkpoints_dir) + '/best_model.pth')
-        best_epoch = checkpoint['epoch']
-        generator.load_state_dict(checkpoint['g_model_state_dict'])
-        discriminator.load_state_dict(checkpoint['d_model_state_dict'])
-        best_acc = checkpoint['best_acc']
-        d_optim.load_state_dict(checkpoint['d_optimizer_state_dict'])
-        g_optim.load_state_dict(checkpoint['g_optimizer_state_dict'])
-        print('Successfully resumed!')
+    # if os.path.exists(str(checkpoints_dir) + '/best_model.pth'):
+    #     print('=====> Loading from checkpoint...')
+    #     checkpoint = torch.load(str(checkpoints_dir) + '/best_model.pth')
+    #     best_epoch = checkpoint['epoch']
+    #     generator.load_state_dict(checkpoint['g_model_state_dict'])
+    #     discriminator.load_state_dict(checkpoint['d_model_state_dict'])
+    #     best_acc = checkpoint['best_acc']
+    #     d_optim.load_state_dict(checkpoint['d_optimizer_state_dict'])
+    #     g_optim.load_state_dict(checkpoint['g_optimizer_state_dict'])
+    #     print('Successfully resumed!')
 
     for epoch in range(epochs):
 
@@ -187,7 +187,7 @@ if __name__ == '__main__':
         print("TRAIN")
         for i, data in enumerate(train_loader, 0):
             points, label = data
-            # print(points.shape,label.shape)
+            print(points.shape,label.shape)
             target_labels = generate_labels(label.numpy())
             target_labels = torch.tensor(target_labels,dtype=torch.long).to(device)
             points, label = points.to(device), label.to(device)
@@ -220,7 +220,7 @@ if __name__ == '__main__':
             correct_adv += pred_choice.eq(target_labels.data).cpu().sum()
             total += label.size(0)
             pred_loss = attack_model_criterion(pred, target_labels)
-            generator_loss = torch.mean((points-points_adv)**2)
+            generator_loss = torch.sum((points-points_adv)**2)/2
             g_loss = generator_loss + TAU * pred_loss + g_loss
 
             g_loss.backward()
@@ -269,7 +269,7 @@ if __name__ == '__main__':
             correct_adv += pred_choice.eq(target_labels.data).cpu().sum()
             total += label.size(0)
             pred_loss = attack_model_criterion(pred, target_labels)
-            generator_loss = torch.mean((points - points_adv) ** 2)
+            generator_loss = torch.sum((points-points_adv)**2)/2
             g_loss = generator_loss + TAU * pred_loss + g_loss
 
 
