@@ -44,16 +44,14 @@ def pool(xyz, points, k, npoint):
     return new_xyz, new_points
 
 class pointcnn(nn.Module):
-    def __init__(self,k,n_cout,n_blocks,activation=F.relu,bn=False):
+    def __init__(self,k,n_cout,n_blocks,activation=F.relu):
         super(pointcnn,self).__init__()
-        self.bn=bn
         self.k = k
         self.n_cout=n_cout
         self.n_blocks = n_blocks
         self.activation = activation
         self.conv1 = nn.Conv2d(3,n_cout,kernel_size=(1,1))
         self.conv2 = nn.Conv2d(n_cout,n_cout,kernel_size=(1,1))
-        self.bn = nn.BatchNorm2d(n_cout)
     def forward(self,xyz):
         # grouped_points: knn points coordinates (normalized: minus centual points)
         # print(xyz.shape)
@@ -70,8 +68,6 @@ class pointcnn(nn.Module):
             if idx == self.n_blocks - 1:
                 return torch.max(grouped_points, 2).values
             else:
-                if self.bn:
-                    grouped_points = self.bn(grouped_points)
                 grouped_points = self.activation(grouped_points)
 
 class res_gcn_d(nn.Module):

@@ -9,7 +9,7 @@ class Discriminator(nn.Module):
     def __init__(self,activation,num_point,bn=False):
         super(Discriminator,self).__init__()
         self.activation = activation
-        self.pointcnn = pointcnn(8,64,2,activation=self.activation,bn=False)
+        self.pointcnn = pointcnn(8,64,2,activation=self.activation)
         self.block_num = int(math.log2(num_point / 64) / 2)
         self.res_gcn_d_list = nn.ModuleList()
         for i in range(self.block_num):
