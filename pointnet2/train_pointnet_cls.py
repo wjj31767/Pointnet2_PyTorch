@@ -133,7 +133,7 @@ def main(cfg):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     model =PointNetCls(40,bool(1)).to(device)
-    checkpoint = torch.load('/home/wei/Pointnet2_PyTorch/pointnet2/models/checkpoints/example1.pth')
+    checkpoint = torch.load('/home/jinwei/Pointnet2_PyTorch/pointnet2/checkpoints/example.pth')
     model.load_state_dict(checkpoint['model_state_dict'])
     # early_stop_callback = pl.callbacks.EarlyStopping(patience=5)
     # checkpoint_callback = pl.callbacks.ModelCheckpoint(
