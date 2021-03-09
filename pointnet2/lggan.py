@@ -162,16 +162,16 @@ if __name__ == '__main__':
     attack_model.eval()
     best_acc = 0.0
     best_epoch = 0
-    # if os.path.exists(str(checkpoints_dir) + '/best_model.pth'):
-    #     print('=====> Loading from checkpoint...')
-    #     checkpoint = torch.load(str(checkpoints_dir) + '/best_model.pth')
-    #     best_epoch = checkpoint['epoch']
-    #     generator.load_state_dict(checkpoint['g_model_state_dict'])
-    #     discriminator.load_state_dict(checkpoint['d_model_state_dict'])
-    #     best_acc = checkpoint['best_acc']
-    #     d_optim.load_state_dict(checkpoint['d_optimizer_state_dict'])
-    #     g_optim.load_state_dict(checkpoint['g_optimizer_state_dict'])
-    #     print('Successfully resumed!')
+    if os.path.exists(str(checkpoints_dir) + '/best_model.pth'):
+        print('=====> Loading from checkpoint...')
+        checkpoint = torch.load(str(checkpoints_dir) + '/best_model.pth')
+        best_epoch = checkpoint['epoch']
+        generator.load_state_dict(checkpoint['g_model_state_dict'])
+        discriminator.load_state_dict(checkpoint['d_model_state_dict'])
+        best_acc = checkpoint['best_acc']
+        d_optim.load_state_dict(checkpoint['d_optimizer_state_dict'])
+        g_optim.load_state_dict(checkpoint['g_optimizer_state_dict'])
+        print('Successfully resumed!')
 
     for epoch in range(epochs):
 
@@ -187,7 +187,7 @@ if __name__ == '__main__':
         print("TRAIN")
         for i, data in enumerate(train_loader, 0):
             points, label = data
-            print(points.shape,label.shape)
+            # print(points.shape,label.shape)
             target_labels = generate_labels(label.numpy())
             target_labels = torch.tensor(target_labels,dtype=torch.long).to(device)
             points, label = points.to(device), label.to(device)
@@ -204,11 +204,13 @@ if __name__ == '__main__':
             d_fake = discriminator(points_adv.detach())
             d_loss_fake = torch.mean(d_fake ** 2)
             d_loss_fake.backward()
+            torch.nn.utils.clip_grad_value_(discriminator.parameters(), 0.01)
             points = points.transpose(2, 1)[:,:3,:]
 
             d_real = discriminator(points)
             d_loss_real = torch.mean((d_real - 1) ** 2)
             d_loss_real.backward()
+            torch.nn.utils.clip_grad_value_(discriminator.parameters(), 0.01)
             d_loss = 0.5 * (d_loss_real + d_loss_fake)
             d_optim.step()
 
@@ -224,6 +226,7 @@ if __name__ == '__main__':
             g_loss = generator_loss + TAU * pred_loss + g_loss
 
             g_loss.backward()
+            torch.nn.utils.clip_grad_value_(discriminator.parameters(), 0.01)
             g_optim.step()
 
             g_loss_total+=g_loss.item()
